@@ -1,0 +1,52 @@
+#![allow(dead_code)]
+
+use std::sync::Arc;
+
+use anyhow::Context;
+use axum::{Router, routing::get};
+use sqlx::postgres::{PgPool, PgPoolOptions};
+
+use crate::{config::Config, database::init_database};
+
+mod cli;
+mod config;
+mod database;
+mod error;
+mod routes;
+mod sanitize;
+
+#[derive(Clone)]
+pub struct State {
+    pub pool:   PgPool,
+    pub config: Arc<Config>,
+}
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let path = std::env::args()
+        .nth(1)
+        .unwrap_or_else(|| "config.toml".to_string());
+    let config = Config::load(&path.into())?;
+
+    let pool = PgPoolOptions::new()
+        .max_connections(config.database.max_connections)
+        .connect(&config.database.url)
+        .await
+        .context("connecting to database")?;
+    init_database(&pool)
+        .await
+        .context("initializing database")?;
+
+    let bind = config.server.bind;
+    let state = State {
+        pool,
+        config: Arc::new(config),
+    };
+
+    let app = Router::new()
+        .route("/", get(|| async { "Hello, world!" }))
+        .with_state(state);
+    let listener = tokio::net::TcpListener::bind(bind).await?;
+    axum::serve(listener, app).await?;
+    Ok(())
+}

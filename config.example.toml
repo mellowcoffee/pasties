@@ -1,0 +1,21 @@
+[server]
+bind = "0.0.0.0:8080"
+
+[database]
+url = "postgres://user:pass@localhost:5432/pasties"
+max_connections = 16
+
+[limits]
+max_pages_per_user = 5000
+max_html_bytes = 262144
+max_css_bytes = 131072
+login_attempts_per_minute = 5
+registrations_per_hour_per_ip = 5
+min_password_length = 6
+
+[registration]
+require_invite = true
+
+[session]
+cookie_name = "session"
+lifetime_days = 365

@@ -1,0 +1,38 @@
+# Stable options
+edition              = "2021"
+max_width            = 100
+hard_tabs            = false
+tab_spaces           = 4
+newline_style        = "Unix"
+use_small_heuristics = "Default"
+
+# Imports: single block, std/external/crate grouped
+reorder_imports     = true
+reorder_modules     = true
+
+# Trailing commas / blocks
+match_block_trailing_comma = true
+use_field_init_shorthand   = true
+use_try_shorthand          = true # Legacy stuff, just to be sure
+
+# Nightly options
+unstable_features = true
+
+# Vertical alignment
+struct_field_align_threshold = 20 # Align struct field types/values
+enum_discrim_align_threshold = 20 # Align enum discriminants
+imports_granularity          = "Crate"
+group_imports                = "StdExternalCrate"
+
+# Let chains
+format_macro_matchers = true
+format_strings        = false
+
+# Comments
+wrap_comments      = true
+comment_width      = 100
+normalize_comments = true
+normalize_doc_attributes = true
+
+# Where clauses, generics
+where_single_line = true
