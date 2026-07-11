@@ -12,8 +12,9 @@ mod cli;
 mod config;
 mod database;
 mod error;
+mod model;
 mod routes;
-mod sanitize;
+mod utility;
 
 #[derive(Clone)]
 pub struct State {
@@ -45,6 +46,9 @@ async fn main() -> anyhow::Result<()> {
 
     let app = Router::new()
         .route("/", get(|| async { "Hello, world!" }))
+        // .route("/register", get(register_get).post(register))
+        // .route("/login", get(login_get).post(login))
+        // .route("/logout", post(logout))
         .with_state(state);
     let listener = tokio::net::TcpListener::bind(bind).await?;
     axum::serve(listener, app).await?;

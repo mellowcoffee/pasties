@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS pages (
     id         bigint PRIMARY KEY,
-    slug       text UNIQUE NOT NULL,
+    slug       text UNIQUE NOT NULL CHECK (slug ~ '^[a-z0-9_-]{3,64}$'),
     owner_id   bigint NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     html       text NOT NULL,
     css        text NOT NULL,

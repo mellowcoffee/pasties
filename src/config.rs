@@ -29,13 +29,21 @@ pub struct Database {
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct Limits {
+pub struct Moderation {
     pub max_pages_per_user:            i64,
-    pub max_html_bytes:                usize,
-    pub max_css_bytes:                 usize,
     pub login_attempts_per_minute:     u32,
     pub registrations_per_hour_per_ip: u32,
-    pub min_password_length:           usize,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Limits {
+    pub bio_max_len:        usize,
+    pub password_min_len:   usize,
+    pub password_max_len:   usize,
+    pub avatar_url_max_len: usize,
+    pub html_max_bytes:     usize,
+    pub css_max_bytes:      usize,
 }
 
 #[derive(Debug, Clone, Deserialize)]

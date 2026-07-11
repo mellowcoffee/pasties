@@ -5,13 +5,18 @@ bind = "0.0.0.0:8080"
 url = "postgres://user:pass@localhost:5432/pasties"
 max_connections = 16
 
-[limits]
+[moderation]
 max_pages_per_user = 5000
-max_html_bytes = 262144
-max_css_bytes = 131072
 login_attempts_per_minute = 5
 registrations_per_hour_per_ip = 5
-min_password_length = 6
+
+[limits]
+bio_max_len = 500
+password_min_len = 6
+password_max_len = 30
+avatar_url_max_len = 300
+html_max_bytes = 262144
+css_max_bytes = 131072
 
 [registration]
 require_invite = true
