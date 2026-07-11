@@ -2,6 +2,7 @@ use std::{net::SocketAddr, path::PathBuf};
 
 use anyhow::{Context, Result};
 use serde::Deserialize;
+use crate::serde_default;
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -28,47 +29,35 @@ pub struct Database {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[serde(deny_unknown_fields, default)]
 pub struct Moderation {
-    #[serde(default = "default_max_pages_per_user")]
-    pub max_pages_per_user:            u32,
-    #[serde(default = "default_login_attempts_per_minute")]
-    pub login_attempts_per_minute:     u32,
-    #[serde(default = "default_registrations_per_hour_per_ip")]
-    pub registrations_per_hour_per_ip: u32,
+        pub max_pages_per_user:            u32,
+        pub login_attempts_per_minute:     u32,
+        pub registrations_per_hour_per_ip: u32,
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[serde(deny_unknown_fields, default)]
 pub struct Limits {
-    #[serde(default = "default_bio_max_len")]
-    pub bio_max_len:        usize,
-    #[serde(default = "default_password_min_len")]
-    pub password_min_len:   usize,
-    #[serde(default = "default_password_max_len")]
-    pub password_max_len:   usize,
-    #[serde(default = "default_avatar_url_max_len")]
-    pub avatar_url_max_len: usize,
-    #[serde(default = "default_html_max_bytes")]
-    pub html_max_bytes:     usize,
-    #[serde(default = "default_css_max_bytes")]
-    pub css_max_bytes:      usize,
+        pub bio_max_len:        usize,
+        pub password_min_len:   usize,
+        pub password_max_len:   usize,
+        pub avatar_url_max_len: usize,
+        pub html_max_bytes:     usize,
+        pub css_max_bytes:      usize,
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[serde(deny_unknown_fields, default)]
 pub struct Registration {
-    #[serde(default = "default_require_invite")]
-    pub require_invite: bool,
+        pub require_invite: bool,
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[serde(deny_unknown_fields, default)]
 pub struct Session {
-    #[serde(default = "default_cookie_name")]
-    pub cookie_name:   String,
-    #[serde(default = "default_lifetime_days")]
-    pub lifetime_days: u32,
+        pub cookie_name:   String,
+        pub lifetime_days: u32,
 }
 
 impl Config {
@@ -81,32 +70,46 @@ impl Config {
     }
 }
 
-macro_rules! serde_default {
-    ($($name:ident: $ty:ty = $val:expr;)*) => {
-        paste::paste! {
-            $(
-                fn [<default_ $name>]() -> $ty { $val }
-            )*
-        }
-    };
-}
-
 serde_default! {
     max_connections: u32 = 5;
+}
 
-    max_pages_per_user: u32 = 5000;
-    login_attempts_per_minute: u32 = 5;
-    registrations_per_hour_per_ip: u32 = 5;
+impl Default for Moderation {
+    fn default() -> Self {
+        Self {
+            max_pages_per_user: 5000,
+            login_attempts_per_minute: 5,
+            registrations_per_hour_per_ip: 5,
+        }
+    }
+}
 
-    bio_max_len: usize = 512;
-    password_min_len: usize = 6;
-    password_max_len: usize = 128;
-    avatar_url_max_len: usize = 512;
-    html_max_bytes: usize = 262144;
-    css_max_bytes: usize = 131072;
+impl Default for Limits {
+    fn default() -> Self {
+        Self {
+            bio_max_len: 512,
+            password_min_len: 6,
+            password_max_len: 128,
+            avatar_url_max_len: 512,
+            html_max_bytes: 262144,
+            css_max_bytes: 131072,
+        }
+    }
+}
 
-    require_invite: bool = true;
+impl Default for Registration {
+    fn default() -> Self {
+        Self {
+            require_invite: true,
+        }
+    }
+}
 
-    cookie_name: String = "session".to_string();
-    lifetime_days: u32 = 365;
+impl Default for Session {
+    fn default() -> Self {
+        Self {
+            cookie_name: "session".to_string(),
+            lifetime_days: 365,
+        }
+    }
 }

@@ -50,3 +50,14 @@ macro_rules! newtype_str {
         }
     };
 }
+
+#[macro_export]
+macro_rules! serde_default {
+    ($($name:ident: $ty:ty = $val:expr;)*) => {
+        paste::paste! {
+            $(
+                fn [<default_ $name>]() -> $ty { $val }
+            )*
+        }
+    };
+}
