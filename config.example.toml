@@ -11,10 +11,10 @@ login_attempts_per_minute = 5
 registrations_per_hour_per_ip = 5
 
 [limits]
-bio_max_len = 500
+bio_max_len = 512
 password_min_len = 6
-password_max_len = 30
-avatar_url_max_len = 300
+password_max_len = 128
+avatar_url_max_len = 512
 html_max_bytes = 262144
 css_max_bytes = 131072
 

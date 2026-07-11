@@ -1,11 +1,10 @@
 use std::sync::LazyLock;
 
 use regex::Regex;
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
-use crate::newtype_str;
-use serde::{Serialize, Deserialize};
 
-use crate::config::Limits;
+use crate::{config::Limits, newtype_str};
 
 #[derive(Debug, Error)]
 pub enum ValidationError {
@@ -59,7 +58,12 @@ pub fn check_min_chars(s: &str, min: usize, err: ValidationError) -> Result<(), 
     }
 }
 
-pub fn check_char_range(s: &str, min: usize, max: usize, err: ValidationError) -> Result<(), ValidationError> {
+pub fn check_char_range(
+    s: &str,
+    min: usize,
+    max: usize,
+    err: ValidationError,
+) -> Result<(), ValidationError> {
     let n = s.chars().count();
     if n >= min && n <= max {
         Ok(())
@@ -68,8 +72,14 @@ pub fn check_char_range(s: &str, min: usize, max: usize, err: ValidationError) -
     }
 }
 
-pub fn check_http_url(s: &str, max_len: usize, err: ValidationError) -> Result<(), ValidationError> {
-    if s.is_empty() { return Ok(()); }
+pub fn check_http_url(
+    s: &str,
+    max_len: usize,
+    err: ValidationError,
+) -> Result<(), ValidationError> {
+    if s.is_empty() {
+        return Ok(());
+    }
     match url::Url::parse(s) {
         Ok(u) if matches!(u.scheme(), "http" | "https") && s.len() <= max_len => Ok(()),
         _ => Err(err),
