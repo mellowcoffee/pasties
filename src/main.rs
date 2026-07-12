@@ -1,9 +1,11 @@
 #![allow(dead_code)]
+#![allow(clippy::unreadable_literal)]
 
 use std::sync::Arc;
 
 use anyhow::Context;
 use axum::{Router, routing::get};
+use snof::SnowflakeGenerator;
 use sqlx::postgres::{PgPool, PgPoolOptions};
 
 use crate::{config::Config, database::init_database};
@@ -18,8 +20,9 @@ mod utility;
 
 #[derive(Clone)]
 pub struct State {
-    pub pool:   PgPool,
-    pub config: Arc<Config>,
+    pub pool:      PgPool,
+    pub snowflake: Arc<SnowflakeGenerator>,
+    pub config:    Arc<Config>,
 }
 
 #[tokio::main]
@@ -41,6 +44,7 @@ async fn main() -> anyhow::Result<()> {
     let bind = config.server.bind;
     let state = State {
         pool,
+        snowflake: Arc::new(SnowflakeGenerator::new()),
         config: Arc::new(config),
     };
 

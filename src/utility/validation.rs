@@ -1,10 +1,9 @@
 use std::sync::LazyLock;
 
 use regex::Regex;
-use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::{config::Limits, newtype_str};
+use crate::config::Limits;
 
 #[derive(Debug, Error)]
 pub enum ValidationError {
@@ -87,63 +86,47 @@ pub fn check_http_url(
 }
 
 // Validators
-newtype_str!(Username);
-newtype_str!(Password);
-newtype_str!(Slug);
-newtype_str!(Bio);
-newtype_str!(AvatarUrl);
-
-impl Username {
-    pub fn parse(raw: String) -> Result<Self, ValidationError> {
-        check_regex(&USERNAME_RE, &raw, ValidationError::Username)?;
-        Ok(Username(raw))
-    }
+pub fn validate_username(str: String) -> Result<String, ValidationError> {
+    check_regex(&USERNAME_RE, &str, ValidationError::Username)?;
+    Ok(str)
 }
 
-impl Slug {
-    pub fn parse(raw: String) -> Result<Self, ValidationError> {
-        check_regex(&SLUG_RE, &raw, ValidationError::Slug)?;
-        Ok(Slug(raw))
-    }
+pub fn validate_slug(str: String) -> Result<String, ValidationError> {
+    check_regex(&SLUG_RE, &str, ValidationError::Slug)?;
+    Ok(str)
 }
 
-impl Password {
-    pub fn parse_with(raw: String, limits: &Limits) -> Result<Self, ValidationError> {
-        check_char_range(
-            &raw,
-            limits.password_min_len,
-            limits.password_max_len,
-            ValidationError::PasswordLength {
-                min: limits.password_min_len,
-                max: limits.password_max_len,
-            },
-        )?;
-        Ok(Password(raw))
-    }
+pub fn validate_password(str: String, limits: &Limits) -> Result<String, ValidationError> {
+    check_char_range(
+        &str,
+        limits.password_min_len,
+        limits.password_max_len,
+        ValidationError::PasswordLength {
+            min: limits.password_min_len,
+            max: limits.password_max_len,
+        },
+    )?;
+    Ok(str)
 }
 
-impl Bio {
-    pub fn parse_with(raw: String, limits: &Limits) -> Result<Self, ValidationError> {
-        check_max_chars(
-            &raw,
-            limits.bio_max_len,
-            ValidationError::BioLength {
-                max: limits.bio_max_len,
-            },
-        )?;
-        Ok(Bio(raw))
-    }
+pub fn validate_bio(str: String, limits: &Limits) -> Result<String, ValidationError> {
+    check_max_chars(
+        &str,
+        limits.bio_max_len,
+        ValidationError::BioLength {
+            max: limits.bio_max_len,
+        },
+    )?;
+    Ok(str)
 }
 
-impl AvatarUrl {
-    pub fn parse_with(raw: String, limits: &Limits) -> Result<Self, ValidationError> {
-        check_http_url(
-            &raw,
-            limits.avatar_url_max_len,
-            ValidationError::AvatarUrl {
-                max: limits.avatar_url_max_len,
-            },
-        )?;
-        Ok(AvatarUrl(raw))
-    }
+pub fn validate_avatar_url(str: String, limits: &Limits) -> Result<String, ValidationError> {
+    check_http_url(
+        &str,
+        limits.avatar_url_max_len,
+        ValidationError::AvatarUrl {
+            max: limits.avatar_url_max_len,
+        },
+    )?;
+    Ok(str)
 }

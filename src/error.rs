@@ -4,7 +4,7 @@ use axum::{
 };
 use thiserror::Error;
 
-use crate::model::validation::ValidationError;
+use crate::utility::validation::ValidationError;
 
 #[derive(Debug, Error)]
 pub enum AuthError {

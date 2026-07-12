@@ -1,4 +1,5 @@
-mod sanitize;
+pub mod sanitize;
+pub mod validation;
 
 use argon2::{
     Argon2,
