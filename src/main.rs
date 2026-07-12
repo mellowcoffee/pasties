@@ -1,10 +1,11 @@
 #![allow(dead_code)]
+#![allow(clippy::match_bool)]
 #![allow(clippy::unreadable_literal)]
 
 use std::sync::Arc;
 
 use anyhow::Context;
-use axum::{Router, routing::get};
+use axum::{routing::get, Router};
 use snof::SnowflakeGenerator;
 use sqlx::postgres::{PgPool, PgPoolOptions};
 

@@ -34,11 +34,19 @@ static SLUG_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^[a-z0-9_-]{3,64
 
 // Constraint functions
 pub fn check_regex(re: &Regex, s: &str, err: ValidationError) -> Result<(), ValidationError> {
-    if re.is_match(s) { Ok(()) } else { Err(err) }
+    if re.is_match(s) {
+        Ok(())
+    } else {
+        Err(err)
+    }
 }
 
 pub fn check_max_bytes(s: &str, max: usize, err: ValidationError) -> Result<(), ValidationError> {
-    if s.len() <= max { Ok(()) } else { Err(err) }
+    if s.len() <= max {
+        Ok(())
+    } else {
+        Err(err)
+    }
 }
 
 pub fn check_max_chars(s: &str, max: usize, err: ValidationError) -> Result<(), ValidationError> {

@@ -1659,9 +1659,8 @@ dependencies = [
 
 [[package]]
 name = "snof"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a372d7484a7bd6b588f797dbaa26a57e3474a68bf9f8c9e23189e0659df6c013"
+version = "0.2.0"
+source = "git+https://github.com/mellowcoffee/snof.git#c9897abd75c32ef18a8d42579f89f07ad3d35013"
 
 [[package]]
 name = "socket2"
