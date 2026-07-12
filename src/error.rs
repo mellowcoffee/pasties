@@ -12,6 +12,10 @@ pub enum AuthError {
     Hash(String),
     #[error("invalid credentials")]
     InvalidCredentials,
+    #[error("invite has been used")]
+    InviteUsed,
+    #[error("username has been taken")]
+    UsernameTaken,
 }
 
 impl From<argon2::password_hash::Error> for AuthError {

@@ -2,6 +2,7 @@ use anyhow::Result;
 use sqlx::PgPool;
 
 pub mod users;
+pub mod invites;
 
 pub async fn init_database(pool: &PgPool) -> Result<()> {
     const SCHEMA: &[&str] = &[
