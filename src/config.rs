@@ -65,7 +65,7 @@ impl Config {
     pub fn load(path: &PathBuf) -> Result<Self> {
         let text = std::fs::read_to_string(path)
             .with_context(|| format!("reading config {}", path.display()))?;
-        let config: Config =
+        let config: Self =
             toml::from_str(&text).with_context(|| format!("parsing config {}", path.display()))?;
         Ok(config)
     }
@@ -109,7 +109,7 @@ impl Default for Registration {
 impl Default for Session {
     fn default() -> Self {
         Self {
-            cookie_name:   "session".to_string(),
+            cookie_name:   "session".to_owned(),
             lifetime_days: 365,
         }
     }

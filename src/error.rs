@@ -20,7 +20,7 @@ pub enum AuthError {
 
 impl From<argon2::password_hash::Error> for AuthError {
     fn from(e: argon2::password_hash::Error) -> Self {
-        AuthError::Hash(e.to_string())
+        Self::Hash(e.to_string())
     }
 }
 
@@ -40,6 +40,7 @@ pub enum AppError {
     BadRequest(String),
 }
 
+#[allow(clippy::use_self)]
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let status = match &self {

@@ -19,7 +19,7 @@ mod model;
 mod routes;
 mod utility;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct State {
     pub pool:      PgPool,
     pub snowflake: Arc<SnowflakeGenerator>,
@@ -30,7 +30,7 @@ pub struct State {
 async fn main() -> anyhow::Result<()> {
     let path = std::env::args()
         .nth(1)
-        .unwrap_or_else(|| "config.toml".to_string());
+        .unwrap_or_else(|| "config.toml".to_owned());
     let config = Config::load(&path.into())?;
 
     let pool = PgPoolOptions::new()

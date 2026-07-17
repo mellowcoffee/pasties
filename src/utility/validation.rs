@@ -29,7 +29,9 @@ pub enum ValidationError {
 }
 
 // Regexes
+#[allow(clippy::unwrap_used)]
 static USERNAME_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^[a-z0-9_-]{3,32}$").unwrap());
+#[allow(clippy::unwrap_used)]
 static SLUG_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^[a-z0-9_-]{3,64}$").unwrap());
 
 // Constraint functions
@@ -41,7 +43,11 @@ pub fn check_regex(re: &Regex, s: &str, err: ValidationError) -> Result<(), Vali
     }
 }
 
-pub fn check_max_bytes(s: &str, max: usize, err: ValidationError) -> Result<(), ValidationError> {
+pub const fn check_max_bytes(
+    s: &str,
+    max: usize,
+    err: ValidationError,
+) -> Result<(), ValidationError> {
     if s.len() <= max {
         Ok(())
     } else {

@@ -47,7 +47,7 @@ pub struct UpdateUserProfile {
 }
 
 impl User {
-    pub async fn create_user(create_user: CreateUser, state: State) -> Result<User, AppError> {
+    pub async fn create_user(create_user: CreateUser, state: State) -> Result<Self, AppError> {
         let username = validate_username(create_user.username.clone())?;
         if let Some(_user) = get_user_by_username(create_user.username, &state).await? {
             Err(AuthError::UsernameTaken)?;
