@@ -3,16 +3,12 @@
 > own discretion. Nothing here is stable, and the schema, routes, and
 > configuration are all subject to change without notice.
 
-### 🦀 pasties
+## 🦀 pasties
 
 A small web service for publishing static pages ("pastes"). Registered users
 may upload pairs of HTML and CSS files and host them at a specified slug.
 
-> [!NOTE]
-> An earlier project of mine was also called pasties. The two are mostly
-> unrelated, the name and some code is reused, little else is.
-
-#### Features
+### Features
 
 - [ ] User accounts with a simple profile: username, bio, and an avatar rendered from an external link.
 - [ ] One HTML file and one CSS file per page, addressed by a global slug.
@@ -21,7 +17,7 @@ may upload pairs of HTML and CSS files and host them at a specified slug.
 - [ ] Optional invite-gated registration, with codes minted by administrators.
 - [ ] An admin dashboard for managing users and pages.
 
-#### Building and running
+### Building and running
 
 ```sh
 cp config.example.toml config.toml
@@ -39,7 +35,26 @@ docker run --name pasties-pg \
   -d postgres:17
 ```
  
-#### Configuration
+### Configuration
  
 All configuration lives in a single TOML file. See `config.example.toml` for
 the full set of options.
+
+### License
+
+```
+Copyright (C) 2026 Maxwell
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published
+by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+```
