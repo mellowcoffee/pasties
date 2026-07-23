@@ -1,10 +1,8 @@
 use sqlx::FromRow;
 
-use crate::{
-    error::{AppError, AuthError},
-    model::users::User,
-    State,
-};
+use crate::error::{AppError, AuthError};
+use crate::model::users::User;
+use crate::State;
 
 pub async fn get_user_by_username(
     username: String,

@@ -5,11 +5,13 @@
 use std::sync::Arc;
 
 use anyhow::Context;
-use axum::{routing::get, Router};
+use axum::routing::get;
+use axum::Router;
 use snof::SnowflakeGenerator;
 use sqlx::postgres::{PgPool, PgPoolOptions};
 
-use crate::{config::Config, database::init_database};
+use crate::config::Config;
+use crate::database::init_database;
 
 mod cli;
 mod config;

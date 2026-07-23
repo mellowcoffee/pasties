@@ -1,15 +1,11 @@
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    database::users::{get_user_by_username, insert_user, insert_user_with_invite},
-    error::{AppError, AuthError},
-    utility::{
-        self,
-        validation::{validate_password, validate_username, ValidationError},
-    },
-    State,
-};
+use crate::database::users::{get_user_by_username, insert_user, insert_user_with_invite};
+use crate::error::{AppError, AuthError};
+use crate::utility::validation::{validate_password, validate_username, ValidationError};
+use crate::utility::{self};
+use crate::State;
 
 #[derive(Clone, Debug, sqlx::FromRow)]
 pub struct User {
