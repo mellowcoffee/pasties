@@ -1,5 +1,5 @@
 pub mod sanitize;
-pub mod validation;
+// pub mod validation;
 
 use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString};

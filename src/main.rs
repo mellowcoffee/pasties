@@ -20,6 +20,7 @@ mod error;
 mod model;
 mod routes;
 mod utility;
+mod validation;
 
 #[derive(Debug, Clone)]
 pub struct State {

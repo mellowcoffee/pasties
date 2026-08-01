@@ -5,7 +5,7 @@ use crate::model::users::User;
 use crate::State;
 
 pub async fn get_user_by_username(
-    username: String,
+    username: &str,
     state: &State,
 ) -> Result<Option<User>, sqlx::Error> {
     let user: Option<User> = sqlx::query(

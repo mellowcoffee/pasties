@@ -2,7 +2,7 @@ use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use thiserror::Error;
 
-use crate::utility::validation::ValidationError;
+use crate::validation::ValidationError;
 
 #[derive(Debug, Error)]
 pub enum AuthError {
@@ -14,6 +14,8 @@ pub enum AuthError {
     InviteUsed,
     #[error("username has been taken")]
     UsernameTaken,
+    #[error("passwords do not match")]
+    PasswordMismatch,
 }
 
 impl From<argon2::password_hash::Error> for AuthError {

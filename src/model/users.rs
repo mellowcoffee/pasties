@@ -3,16 +3,16 @@ use serde::{Deserialize, Serialize};
 
 use crate::database::users::{get_user_by_username, insert_user, insert_user_with_invite};
 use crate::error::{AppError, AuthError};
-use crate::utility::validation::{validate_password, validate_username, ValidationError};
 use crate::utility::{self};
+use crate::validation::user::{AvatarUrl, Bio, Password, Username};
 use crate::State;
 
 #[derive(Clone, Debug, sqlx::FromRow)]
 pub struct User {
     pub id:            i64,
-    pub username:      String,
-    pub bio:           String,
-    pub avatar_url:    String,
+    pub username:      Username,
+    pub bio:           Bio,
+    pub avatar_url:    AvatarUrl,
     pub password_hash: String,
     pub is_admin:      bool,
     pub created_at:    chrono::DateTime<Utc>,
@@ -44,16 +44,16 @@ pub struct UpdateUserProfile {
 
 impl User {
     pub async fn create_user(create_user: CreateUser, state: State) -> Result<Self, AppError> {
-        let username = validate_username(create_user.username.clone())?;
-        if let Some(_user) = get_user_by_username(create_user.username, &state).await? {
+        let username = Username::parse(create_user.username.clone(), &state.config.limits)?;
+        if let Some(_user) = get_user_by_username(username.as_str(), &state).await? {
             Err(AuthError::UsernameTaken)?;
         }
 
         if create_user.password != create_user.password_confirm {
-            Err(ValidationError::PasswordMismatch)?;
+            Err(AuthError::PasswordMismatch)?;
         }
-        let password = validate_password(create_user.password, &state.config.limits)?;
-        let password_hash = utility::hash_password(&password)?;
+        let password = Password::parse(create_user.password, &state.config.limits)?;
+        let password_hash = utility::hash_password(password.as_str())?;
 
         let id = state.snowflake.generate().to_i64();
 
@@ -61,14 +61,14 @@ impl User {
             true => {
                 insert_user_with_invite(
                     id,
-                    username,
+                    username.clone().into_string(),
                     password_hash,
                     create_user.invite_code,
                     &state,
                 )
                 .await?
             },
-            false => insert_user(id, username, password_hash, &state).await?,
+            false => insert_user(id, username.into_string(), password_hash, &state).await?,
         };
 
         Ok(user)
