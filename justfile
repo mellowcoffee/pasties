@@ -7,5 +7,5 @@ license:
 check: fmt license
     cargo clippy
 
-clippy:
+watch:
     cargo watch -c -x clippy

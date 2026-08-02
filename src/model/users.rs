@@ -44,8 +44,8 @@ pub struct UpdateUserProfile {
 
 impl User {
     pub async fn create_user(create_user: CreateUser, state: State) -> Result<Self, AppError> {
-        let username = Username::parse(create_user.username.clone(), &state.config.limits)?;
-        if let Some(_user) = get_user_by_username(username.as_str(), &state).await? {
+        let username = Username::parse(create_user.username.clone())?;
+        if let Some(_user) = get_user_by_username(username.as_inner(), &state).await? {
             Err(AuthError::UsernameTaken)?;
         }
 
@@ -53,7 +53,7 @@ impl User {
             Err(AuthError::PasswordMismatch)?;
         }
         let password = Password::parse(create_user.password, &state.config.limits)?;
-        let password_hash = utility::hash_password(password.as_str())?;
+        let password_hash = utility::hash_password(password.as_inner())?;
 
         let id = state.snowflake.generate().to_i64();
 
@@ -61,14 +61,14 @@ impl User {
             true => {
                 insert_user_with_invite(
                     id,
-                    username.clone().into_string(),
+                    username.clone().into_inner(),
                     password_hash,
                     create_user.invite_code,
                     &state,
                 )
                 .await?
             },
-            false => insert_user(id, username.into_string(), password_hash, &state).await?,
+            false => insert_user(id, username.into_inner(), password_hash, &state).await?,
         };
 
         Ok(user)
