@@ -5,11 +5,13 @@ use thiserror::Error;
 use crate::validation::ValidationError;
 
 #[derive(Debug, Error)]
-pub enum AuthError {
+pub enum UserError {
     #[error("password hashing failed: {0}")]
     Hash(String),
     #[error("invalid credentials")]
     InvalidCredentials,
+    #[error("invalid user id")]
+    InvalidId,
     #[error("invite has been used")]
     InviteUsed,
     #[error("username has been taken")]
@@ -18,24 +20,30 @@ pub enum AuthError {
     PasswordMismatch,
 }
 
-impl From<argon2::password_hash::Error> for AuthError {
+impl From<argon2::password_hash::Error> for UserError {
     fn from(e: argon2::password_hash::Error) -> Self {
         Self::Hash(e.to_string())
     }
 }
 
 #[derive(Debug, Error)]
+pub enum PageError {
+    #[error("slug has been taken")]
+    SlugTaken,
+    #[error("no page with this slug exists")]
+    NotFound,
+}
+
+#[derive(Debug, Error)]
 pub enum AppError {
     #[error(transparent)]
-    Auth(#[from] AuthError),
+    Auth(#[from] UserError),
+    #[error(transparent)]
+    Page(#[from] PageError),
     #[error(transparent)]
     Validation(#[from] ValidationError),
     #[error("database error")]
     Database(#[from] sqlx::Error),
-    #[error("not found")]
-    NotFound,
-    #[error("forbidden")]
-    Forbidden,
     #[error("bad request: {0}")]
     BadRequest(String),
 }
@@ -44,11 +52,15 @@ pub enum AppError {
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let status = match &self {
-            AppError::NotFound => StatusCode::NOT_FOUND,
-            AppError::Forbidden => StatusCode::FORBIDDEN,
-            AppError::BadRequest(_) | AppError::Validation(_) => StatusCode::BAD_REQUEST,
-            AppError::Auth(AuthError::InvalidCredentials) => StatusCode::UNAUTHORIZED,
-            AppError::Auth(_) | AppError::Database(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            AppError::BadRequest(_)
+            | AppError::Validation(_)
+            | AppError::Page(_) => StatusCode::BAD_REQUEST,
+            AppError::Auth(UserError::InvalidCredentials) => {
+                StatusCode::UNAUTHORIZED
+            },
+            AppError::Auth(_) | AppError::Database(_) => {
+                StatusCode::INTERNAL_SERVER_ERROR
+            },
         };
         if status == StatusCode::INTERNAL_SERVER_ERROR {
             eprintln!("internal error: {self:?}");

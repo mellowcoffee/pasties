@@ -1,17 +1,22 @@
 pub mod sanitize;
 // pub mod validation;
 
+use std::time::{SystemTime, UNIX_EPOCH};
+
 use argon2::password_hash::rand_core::OsRng;
-use argon2::password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString};
+use argon2::password_hash::{
+    PasswordHash, PasswordHasher, PasswordVerifier, SaltString,
+};
 use argon2::Argon2;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine;
+use chrono::Utc;
 use rand::Rng;
 use sha2::{Digest, Sha256};
 
-use crate::error::AuthError;
+use crate::error::UserError;
 
-pub fn hash_password(password: &str) -> Result<String, AuthError> {
+pub fn hash_password(password: &str) -> Result<String, UserError> {
     let salt = SaltString::generate(&mut OsRng);
     let phc = Argon2::default()
         .hash_password(password.as_bytes(), &salt)?
@@ -19,7 +24,10 @@ pub fn hash_password(password: &str) -> Result<String, AuthError> {
     Ok(phc)
 }
 
-pub fn verify_password(password: &str, phc: &str) -> Result<bool, argon2::password_hash::Error> {
+pub fn verify_password(
+    password: &str,
+    phc: &str,
+) -> Result<bool, argon2::password_hash::Error> {
     let parsed = PasswordHash::new(phc)?;
     match Argon2::default().verify_password(password.as_bytes(), &parsed) {
         Ok(()) => Ok(true),
@@ -36,6 +44,21 @@ pub fn generate_token() -> String {
 
 pub fn hash_token(token: &str) -> Vec<u8> {
     Sha256::digest(token.as_bytes()).to_vec()
+}
+
+pub fn datetime_now() -> chrono::DateTime<Utc> {
+    #[allow(clippy::expect_used)]
+    let time = i64::try_from(
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("Time went backwards")
+            .as_millis(),
+    )
+    .expect("Timestamp exceeds i64 capacity");
+
+    #[allow(clippy::expect_used)]
+    chrono::DateTime::<Utc>::from_timestamp_millis(time)
+        .expect("Milliseconds out of range")
 }
 
 #[macro_export]

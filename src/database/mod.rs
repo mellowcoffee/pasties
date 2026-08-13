@@ -2,6 +2,7 @@ use anyhow::Result;
 use sqlx::PgPool;
 
 pub mod invites;
+pub mod pages;
 pub mod users;
 
 pub async fn init_database(pool: &PgPool) -> Result<()> {
