@@ -6,7 +6,6 @@ use crate::database::users::{
     update_user_credentials_by_username, update_user_profile_by_username,
 };
 use crate::error::{AppError, UserError};
-use crate::utility::{self, hash_password, verify_password};
 use crate::validation::user::{AvatarUrl, Bio, Password, Username};
 use crate::State;
 
@@ -59,7 +58,7 @@ impl User {
             Err(UserError::PasswordMismatch)?;
         }
         let password = Password::parse(create_user.password, &state.config.limits)?;
-        let password_hash = utility::hash_password(password.as_inner())?;
+        let password_hash = password.hash()?;
 
         let id = state.snowflake.generate().to_i64();
 
@@ -94,15 +93,13 @@ impl User {
         let new_password =
             Password::parse(update_user.new_password, &state.config.limits)?;
 
-        // TODO: Verify password should be able to monadically propagate, avoiding
-        // dirty ahh imperative if
-        if !verify_password(password.as_inner(), &user.password_hash)
+        if !password
+            .verify(&user.password_hash)
             .map_err(UserError::from)?
         {
             Err(UserError::InvalidCredentials)?;
         }
-        // TODO: Attach verification and hashing to [`Password`]
-        let new_password_hash = hash_password(new_password.as_inner())?;
+        let new_password_hash = new_password.hash()?;
 
         let new_username = Username::parse(update_user.new_username)?;
         if let Some(_user) = get_user_by_username(&new_username, &state).await? {
@@ -131,9 +128,8 @@ impl User {
 
         let password = Password::parse(update_user.password, &state.config.limits)?;
 
-        // TODO: Verify password should be able to monadically propagate, avoiding
-        // dirty ahh imperative if
-        if !verify_password(password.as_inner(), &user.password_hash)
+        if !password
+            .verify(&user.password_hash)
             .map_err(UserError::from)?
         {
             Err(UserError::InvalidCredentials)?;

@@ -1,6 +1,4 @@
 #![allow(dead_code)]
-#![allow(clippy::match_bool)]
-#![allow(clippy::unreadable_literal)]
 
 use std::sync::Arc;
 

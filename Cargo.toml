@@ -45,11 +45,13 @@ pedantic = { level = "warn", priority = -1 }
 nursery = { level = "warn", priority = -1 }
 cargo = { level = "warn", priority = -1 }
 
-multiple_crate_versions = "allow"
-missing_const_for_fn = "allow"
 cargo_common_metadata = "allow"
 equatable_if_let = "allow"
 manual_let_else = "allow"
+match_bool = "allow"
+missing_const_for_fn = "allow"
+multiple_crate_versions = "allow"
+useless_conversion = "allow"
 
 unwrap_used = "warn"
 expect_used = "warn"

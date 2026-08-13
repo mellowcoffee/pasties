@@ -93,8 +93,8 @@ impl Default for Limits {
             password_min_len:   6,
             password_max_len:   128,
             avatar_url_max_len: 512,
-            html_max_bytes:     262144,
-            css_max_bytes:      131072,
+            html_max_bytes:     262_144,
+            css_max_bytes:      131_072,
         }
     }
 }
