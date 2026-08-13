@@ -34,10 +34,7 @@ pub struct UpdatePage {
 }
 
 impl Page {
-    pub async fn create_page(
-        page: CreatePage,
-        state: State,
-    ) -> Result<Self, AppError> {
+    pub async fn create_page(page: CreatePage, state: State) -> Result<Self, AppError> {
         let slug = Slug::parse(page.slug)?;
         let html = Html::parse(page.html, &state.config.limits)?;
         let css = Css::parse(page.css, &state.config.limits)?;
@@ -56,10 +53,7 @@ impl Page {
         Ok(page)
     }
 
-    pub async fn update_page(
-        update_page: UpdatePage,
-        state: State,
-    ) -> Result<Self, AppError> {
+    pub async fn update_page(update_page: UpdatePage, state: State) -> Result<Self, AppError> {
         let slug = Slug::parse(update_page.slug)?;
         let _page = get_page_by_slug(&slug, &state)
             .await?
@@ -73,8 +67,7 @@ impl Page {
         let new_html = Html::parse(update_page.new_html, &state.config.limits)?;
         let new_css = Css::parse(update_page.new_css, &state.config.limits)?;
 
-        let new_page =
-            update_page_by_slug(slug, new_slug, new_html, new_css, &state).await?;
+        let new_page = update_page_by_slug(slug, new_slug, new_html, new_css, &state).await?;
         Ok(new_page)
     }
 }

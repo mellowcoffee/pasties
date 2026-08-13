@@ -52,15 +52,11 @@ pub enum AppError {
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let status = match &self {
-            AppError::BadRequest(_)
-            | AppError::Validation(_)
-            | AppError::Page(_) => StatusCode::BAD_REQUEST,
-            AppError::Auth(UserError::InvalidCredentials) => {
-                StatusCode::UNAUTHORIZED
+            AppError::BadRequest(_) | AppError::Validation(_) | AppError::Page(_) => {
+                StatusCode::BAD_REQUEST
             },
-            AppError::Auth(_) | AppError::Database(_) => {
-                StatusCode::INTERNAL_SERVER_ERROR
-            },
+            AppError::Auth(UserError::InvalidCredentials) => StatusCode::UNAUTHORIZED,
+            AppError::Auth(_) | AppError::Database(_) => StatusCode::INTERNAL_SERVER_ERROR,
         };
         if status == StatusCode::INTERNAL_SERVER_ERROR {
             eprintln!("internal error: {self:?}");

@@ -45,12 +45,9 @@ pub struct UpdateUserProfile {
 }
 
 impl User {
-    pub async fn create_user(
-        create_user: CreateUser,
-        state: State,
-    ) -> Result<Self, AppError> {
+    pub async fn create_user(create_user: CreateUser, state: State) -> Result<Self, AppError> {
         let username = Username::parse(create_user.username)?;
-        if let Some(_user) = get_user_by_username(&username, &state).await? {
+        if get_user_by_username(&username, &state).await?.is_some() {
             Err(UserError::UsernameTaken)?;
         }
 
@@ -84,14 +81,12 @@ impl User {
         state: State,
     ) -> Result<Self, AppError> {
         let username = Username::parse(update_user.username)?;
-        let user = match get_user_by_username(&username, &state).await? {
-            Some(user) => user,
-            None => return Err(UserError::InvalidCredentials)?,
-        };
+        let user = get_user_by_username(&username, &state)
+            .await?
+            .ok_or(UserError::InvalidCredentials)?;
 
         let password = Password::parse(update_user.password, &state.config.limits)?;
-        let new_password =
-            Password::parse(update_user.new_password, &state.config.limits)?;
+        let new_password = Password::parse(update_user.new_password, &state.config.limits)?;
 
         if !password
             .verify(&user.password_hash)
@@ -102,17 +97,13 @@ impl User {
         let new_password_hash = new_password.hash()?;
 
         let new_username = Username::parse(update_user.new_username)?;
-        if let Some(_user) = get_user_by_username(&new_username, &state).await? {
+        if get_user_by_username(&new_username, &state).await?.is_some() {
             Err(UserError::UsernameTaken)?;
         }
 
-        let new_user = update_user_credentials_by_username(
-            username,
-            new_username,
-            new_password_hash,
-            &state,
-        )
-        .await?;
+        let new_user =
+            update_user_credentials_by_username(username, new_username, new_password_hash, &state)
+                .await?;
         Ok(new_user)
     }
 
@@ -121,10 +112,9 @@ impl User {
         state: State,
     ) -> Result<Self, AppError> {
         let username = Username::parse(update_user.username)?;
-        let user = match get_user_by_username(&username, &state).await? {
-            Some(user) => user,
-            None => Err(UserError::InvalidCredentials)?,
-        };
+        let user = get_user_by_username(&username, &state)
+            .await?
+            .ok_or(UserError::InvalidCredentials)?;
 
         let password = Password::parse(update_user.password, &state.config.limits)?;
 
@@ -136,16 +126,10 @@ impl User {
         }
 
         let new_bio = Bio::parse(update_user.bio, &state.config.limits)?;
-        let new_avatar_url =
-            AvatarUrl::parse(update_user.avatar_url, &state.config.limits)?;
+        let new_avatar_url = AvatarUrl::parse(update_user.avatar_url, &state.config.limits)?;
 
-        let new_user = update_user_profile_by_username(
-            username,
-            new_bio,
-            new_avatar_url,
-            &state,
-        )
-        .await?;
+        let new_user =
+            update_user_profile_by_username(username, new_bio, new_avatar_url, &state).await?;
         Ok(new_user)
     }
 }

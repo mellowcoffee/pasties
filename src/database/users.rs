@@ -22,10 +22,7 @@ pub async fn get_user_by_username(
     Ok(user)
 }
 
-pub async fn get_user_by_id(
-    id: i64,
-    state: &State,
-) -> Result<Option<User>, sqlx::Error> {
+pub async fn get_user_by_id(id: i64, state: &State) -> Result<Option<User>, sqlx::Error> {
     let user: Option<User> = sqlx::query(
         "SELECT (id, username, bio, avatar_url, password_hash, is_admin, created_at)
         FROM users

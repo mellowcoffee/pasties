@@ -12,8 +12,7 @@ use crate::newtype;
 use crate::validation::ValidationError;
 
 #[allow(clippy::unwrap_used)]
-static USERNAME_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^[a-z0-9_-]{3,32}$").unwrap());
+static USERNAME_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^[a-z0-9_-]{3,32}$").unwrap());
 
 newtype!(Username(String), |raw| USERNAME_RE
     .is_match(&raw)

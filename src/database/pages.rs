@@ -5,10 +5,7 @@ use crate::utility::datetime_now;
 use crate::validation::page::{Css, Html, Slug};
 use crate::State;
 
-pub async fn get_page_by_slug(
-    slug: &Slug,
-    state: &State,
-) -> Result<Option<Page>, sqlx::Error> {
+pub async fn get_page_by_slug(slug: &Slug, state: &State) -> Result<Option<Page>, sqlx::Error> {
     let page: Option<Page> = sqlx::query(
         "SELECT (id, slug, owner_id, html, css, views, created_at, updated_at)
         FROM pages

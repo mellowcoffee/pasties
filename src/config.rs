@@ -66,8 +66,8 @@ impl Config {
     pub fn load(path: &PathBuf) -> Result<Self> {
         let text = std::fs::read_to_string(path)
             .with_context(|| format!("reading config {}", path.display()))?;
-        let config: Self = toml::from_str(&text)
-            .with_context(|| format!("parsing config {}", path.display()))?;
+        let config: Self =
+            toml::from_str(&text).with_context(|| format!("parsing config {}", path.display()))?;
         Ok(config)
     }
 }

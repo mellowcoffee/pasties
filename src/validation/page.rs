@@ -8,8 +8,7 @@ use crate::newtype;
 use crate::validation::ValidationError;
 
 #[allow(clippy::unwrap_used)]
-static SLUG_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^[a-z0-9_-]{3,64}$").unwrap());
+static SLUG_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^[a-z0-9_-]{3,64}$").unwrap());
 
 newtype!(Slug(String), |raw| SLUG_RE
     .is_match(&raw)

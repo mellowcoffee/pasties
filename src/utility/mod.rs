@@ -27,8 +27,7 @@ pub fn datetime_now() -> chrono::DateTime<Utc> {
     .expect("Timestamp exceeds i64 capacity");
 
     #[allow(clippy::expect_used)]
-    chrono::DateTime::<Utc>::from_timestamp_millis(time)
-        .expect("Milliseconds out of range")
+    chrono::DateTime::<Utc>::from_timestamp_millis(time).expect("Milliseconds out of range")
 }
 
 #[macro_export]
