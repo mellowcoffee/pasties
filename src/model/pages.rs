@@ -9,21 +9,21 @@ use crate::State;
 
 #[derive(FromRow)]
 pub struct Page {
-    id:         i64,
-    slug:       Slug,
-    owner_id:   i64,
-    html:       Html,
-    css:        Css,
-    views:      i64,
-    created_at: chrono::DateTime<Utc>,
-    updated_at: chrono::DateTime<Utc>,
+    pub id:         i64,
+    pub slug:       Slug,
+    pub owner_id:   i64,
+    pub html:       Html,
+    pub css:        Css,
+    pub views:      i64,
+    pub created_at: chrono::DateTime<Utc>,
+    pub updated_at: chrono::DateTime<Utc>,
 }
 
 pub struct CreatePage {
-    slug:     String,
-    owner_id: i64,
-    html:     String,
-    css:      String,
+    pub slug:     String,
+    pub owner_id: i64,
+    pub html:     String,
+    pub css:      String,
 }
 
 pub struct UpdatePage {
@@ -33,41 +33,47 @@ pub struct UpdatePage {
     new_css:  String,
 }
 
-impl Page {
-    pub async fn create_page(page: CreatePage, state: State) -> Result<Self, AppError> {
-        let slug = Slug::parse(page.slug)?;
-        let html = Html::parse(page.html, &state.config.limits)?;
-        let css = Css::parse(page.css, &state.config.limits)?;
+pub async fn create_page(page: CreatePage, state: &State) -> Result<Page, AppError> {
+    let slug = Slug::parse(page.slug)?;
+    let html = Html::parse(page.html, &state.config.limits)?;
+    let css = Css::parse(page.css, &state.config.limits)?;
 
-        if let Ok(None) = get_user_by_id(page.owner_id, &state).await {
-            Err(UserError::InvalidId)?;
-        }
-
-        let id = state.snowflake.generate().to_i64();
-
-        if get_page_by_slug(&slug, &state).await?.is_some() {
-            Err(PageError::SlugTaken)?;
-        }
-
-        let page = insert_page(id, slug, page.owner_id, html, css, &state).await?;
-        Ok(page)
+    if let Ok(None) = get_user_by_id(page.owner_id, state).await {
+        Err(UserError::InvalidId)?;
     }
 
-    pub async fn update_page(update_page: UpdatePage, state: State) -> Result<Self, AppError> {
-        let slug = Slug::parse(update_page.slug)?;
-        let _page = get_page_by_slug(&slug, &state)
-            .await?
-            .ok_or(PageError::NotFound)?;
+    let id = state.snowflake.generate().to_i64();
 
-        let new_slug = Slug::parse(update_page.new_slug)?;
-        if get_page_by_slug(&new_slug, &state).await?.is_some() {
-            Err(PageError::SlugTaken)?;
-        }
-
-        let new_html = Html::parse(update_page.new_html, &state.config.limits)?;
-        let new_css = Css::parse(update_page.new_css, &state.config.limits)?;
-
-        let new_page = update_page_by_slug(slug, new_slug, new_html, new_css, &state).await?;
-        Ok(new_page)
+    if get_page_by_slug(&slug, state).await?.is_some() {
+        Err(PageError::SlugTaken)?;
     }
+
+    let page = insert_page(id, slug, page.owner_id, html, css, state).await?;
+    Ok(page)
+}
+
+pub async fn update_page(update_page: UpdatePage, state: &State) -> Result<Page, AppError> {
+    let slug = Slug::parse(update_page.slug)?;
+    let _page = get_page_by_slug(&slug, state)
+        .await?
+        .ok_or(PageError::NotFound)?;
+
+    let new_slug = Slug::parse(update_page.new_slug)?;
+    if get_page_by_slug(&new_slug, state).await?.is_some() {
+        Err(PageError::SlugTaken)?;
+    }
+
+    let new_html = Html::parse(update_page.new_html, &state.config.limits)?;
+    let new_css = Css::parse(update_page.new_css, &state.config.limits)?;
+
+    let new_page = update_page_by_slug(slug, new_slug, new_html, new_css, state).await?;
+    Ok(new_page)
+}
+
+pub async fn get_page(slug: String, state: &State) -> Result<Page, AppError> {
+    let slug = Slug::parse(slug)?;
+    let page = get_page_by_slug(&slug, state)
+        .await?
+        .ok_or(PageError::NotFound)?;
+    Ok(page)
 }

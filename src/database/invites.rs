@@ -1,7 +1,7 @@
 use crate::model::invites::Invite;
 use crate::State;
 
-pub async fn insert_invite(invite: Invite, state: State) -> Result<(), sqlx::Error> {
+pub async fn insert_invite(invite: Invite, state: &State) -> Result<(), sqlx::Error> {
     #[allow(clippy::cast_possible_wrap)]
     sqlx::query(
         "INSERT INTO invites (code, created_by)

@@ -46,6 +46,7 @@ pub async fn insert_user(
         "
         INSERT INTO users (id, username, password_hash)
         VALUES ($1, $2, $3)
+        RETURNING id, username, bio, avatar_url, password_hash, is_admin, created_at
     ",
     )
     .bind(id)
@@ -66,7 +67,7 @@ pub async fn insert_user_with_invite(
     let mut tx = state.pool.begin().await?;
     let consumed = sqlx::query(
         "UPDATE invites
-        SET (used_by = $1, used_at = now())
+        SET used_by = $1, used_at = now()
         WHERE code = $2 AND used_by IS NULL",
     )
     .bind(id)
@@ -104,7 +105,7 @@ pub async fn update_user_credentials_by_username(
         UPDATE users
         SET username = $1, password_hash = $2
         WHERE username = $3
-        RETURNING (id, username, bio, avatar_url, password_hash, is_admin, created_at)
+        RETURNING id, username, bio, avatar_url, password_hash, is_admin, created_at
     ",
     )
     .bind(new_username)
@@ -126,7 +127,7 @@ pub async fn update_user_profile_by_username(
         UPDATE users
         SET bio = $1, avatar_url = $2
         WHERE username = $3
-        RETURNING (id, username, bio, avatar_url, password_hash, is_admin, created_at)
+        RETURNING id, username, bio, avatar_url, password_hash, is_admin, created_at
     ",
     )
     .bind(new_bio)

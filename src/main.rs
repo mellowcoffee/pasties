@@ -10,6 +10,9 @@ use sqlx::postgres::{PgPool, PgPoolOptions};
 
 use crate::config::Config;
 use crate::database::init_database;
+use crate::error::AppError;
+use crate::model::pages::{self, CreatePage};
+use crate::model::users::{self, CreateUser};
 
 mod cli;
 mod config;
@@ -50,13 +53,41 @@ async fn main() -> anyhow::Result<()> {
         config: Arc::new(config),
     };
 
+    // test(state.clone()).await?;
+
     let app = Router::new()
         .route("/", get(|| async { "Hello, world!" }))
-        // .route("/register", get(register_get).post(register))
-        // .route("/login", get(login_get).post(login))
-        // .route("/logout", post(logout))
-        .with_state(state);
+        .merge(routes::pages::router(state));
+    // .route("/register", get(register_get).post(register))
+    // .route("/login", get(login_get).post(login))
+    // .route("/logout", post(logout))
+    // .with_state(state);
     let listener = tokio::net::TcpListener::bind(bind).await?;
     axum::serve(listener, app).await?;
+    Ok(())
+}
+
+async fn test(state: State) -> Result<(), AppError> {
+    let user = users::create_user(
+        CreateUser {
+            username:         "admin".to_owned(),
+            password:         "password".to_owned(),
+            password_confirm: "password".to_owned(),
+            invite_code:      String::new(),
+        },
+        &state,
+    )
+    .await?;
+
+    let _page = pages::create_page(
+        CreatePage {
+            slug:     "first".to_owned(),
+            owner_id: user.id,
+            html:     "<b>Hello from First!</b>".to_owned(),
+            css:      String::new(),
+        },
+        &state,
+    )
+    .await?;
     Ok(())
 }

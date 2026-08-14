@@ -44,92 +44,90 @@ pub struct UpdateUserProfile {
     pub avatar_url: String,
 }
 
-impl User {
-    pub async fn create_user(create_user: CreateUser, state: State) -> Result<Self, AppError> {
-        let username = Username::parse(create_user.username)?;
-        if get_user_by_username(&username, &state).await?.is_some() {
-            Err(UserError::UsernameTaken)?;
-        }
-
-        if create_user.password != create_user.password_confirm {
-            Err(UserError::PasswordMismatch)?;
-        }
-        let password = Password::parse(create_user.password, &state.config.limits)?;
-        let password_hash = password.hash()?;
-
-        let id = state.snowflake.generate().to_i64();
-
-        let user = match state.config.registration.require_invite {
-            true => {
-                insert_user_with_invite(
-                    id,
-                    username.clone(),
-                    password_hash,
-                    create_user.invite_code,
-                    &state,
-                )
-                .await?
-            },
-            false => insert_user(id, username, password_hash, &state).await?,
-        };
-
-        Ok(user)
+pub async fn create_user(create_user: CreateUser, state: &State) -> Result<User, AppError> {
+    let username = Username::parse(create_user.username)?;
+    if get_user_by_username(&username, state).await?.is_some() {
+        Err(UserError::UsernameTaken)?;
     }
 
-    pub async fn update_user_credentials(
-        update_user: UpdateUserCredentials,
-        state: State,
-    ) -> Result<Self, AppError> {
-        let username = Username::parse(update_user.username)?;
-        let user = get_user_by_username(&username, &state)
+    if create_user.password != create_user.password_confirm {
+        Err(UserError::PasswordMismatch)?;
+    }
+    let password = Password::parse(create_user.password, &state.config.limits)?;
+    let password_hash = password.hash()?;
+
+    let id = state.snowflake.generate().to_i64();
+
+    let user = match state.config.registration.require_invite {
+        true => {
+            insert_user_with_invite(
+                id,
+                username.clone(),
+                password_hash,
+                create_user.invite_code,
+                state,
+            )
             .await?
-            .ok_or(UserError::InvalidCredentials)?;
+        },
+        false => insert_user(id, username, password_hash, state).await?,
+    };
 
-        let password = Password::parse(update_user.password, &state.config.limits)?;
-        let new_password = Password::parse(update_user.new_password, &state.config.limits)?;
+    Ok(user)
+}
 
-        if !password
-            .verify(&user.password_hash)
-            .map_err(UserError::from)?
-        {
-            Err(UserError::InvalidCredentials)?;
-        }
-        let new_password_hash = new_password.hash()?;
+pub async fn update_user_credentials(
+    update_user: UpdateUserCredentials,
+    state: &State,
+) -> Result<User, AppError> {
+    let username = Username::parse(update_user.username)?;
+    let user = get_user_by_username(&username, state)
+        .await?
+        .ok_or(UserError::InvalidCredentials)?;
 
-        let new_username = Username::parse(update_user.new_username)?;
-        if get_user_by_username(&new_username, &state).await?.is_some() {
-            Err(UserError::UsernameTaken)?;
-        }
+    let password = Password::parse(update_user.password, &state.config.limits)?;
+    let new_password = Password::parse(update_user.new_password, &state.config.limits)?;
 
-        let new_user =
-            update_user_credentials_by_username(username, new_username, new_password_hash, &state)
-                .await?;
-        Ok(new_user)
+    if !password
+        .verify(&user.password_hash)
+        .map_err(UserError::from)?
+    {
+        Err(UserError::InvalidCredentials)?;
+    }
+    let new_password_hash = new_password.hash()?;
+
+    let new_username = Username::parse(update_user.new_username)?;
+    if get_user_by_username(&new_username, state).await?.is_some() {
+        Err(UserError::UsernameTaken)?;
     }
 
-    pub async fn update_user_profile(
-        update_user: UpdateUserProfile,
-        state: State,
-    ) -> Result<Self, AppError> {
-        let username = Username::parse(update_user.username)?;
-        let user = get_user_by_username(&username, &state)
-            .await?
-            .ok_or(UserError::InvalidCredentials)?;
+    let new_user =
+        update_user_credentials_by_username(username, new_username, new_password_hash, state)
+            .await?;
+    Ok(new_user)
+}
 
-        let password = Password::parse(update_user.password, &state.config.limits)?;
+pub async fn update_user_profile(
+    update_user: UpdateUserProfile,
+    state: &State,
+) -> Result<User, AppError> {
+    let username = Username::parse(update_user.username)?;
+    let user = get_user_by_username(&username, state)
+        .await?
+        .ok_or(UserError::InvalidCredentials)?;
 
-        if !password
-            .verify(&user.password_hash)
-            .map_err(UserError::from)?
-        {
-            Err(UserError::InvalidCredentials)?;
-        }
+    let password = Password::parse(update_user.password, &state.config.limits)?;
 
-        let new_bio = Bio::parse(update_user.bio, &state.config.limits)?;
-        let new_avatar_url = AvatarUrl::parse(update_user.avatar_url, &state.config.limits)?;
-
-        let new_user =
-            update_user_profile_by_username(username, new_bio, new_avatar_url, &state).await?;
-        Ok(new_user)
+    if !password
+        .verify(&user.password_hash)
+        .map_err(UserError::from)?
+    {
+        Err(UserError::InvalidCredentials)?;
     }
+
+    let new_bio = Bio::parse(update_user.bio, &state.config.limits)?;
+    let new_avatar_url = AvatarUrl::parse(update_user.avatar_url, &state.config.limits)?;
+
+    let new_user =
+        update_user_profile_by_username(username, new_bio, new_avatar_url, state).await?;
+    Ok(new_user)
 }

@@ -11,6 +11,7 @@ use crate::serde_default;
 pub struct Config {
     pub server:       Server,
     pub database:     Database,
+    pub moderation:   Moderation,
     pub limits:       Limits,
     pub registration: Registration,
     pub session:      Session,

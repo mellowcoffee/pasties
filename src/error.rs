@@ -6,17 +6,17 @@ use crate::validation::ValidationError;
 
 #[derive(Debug, Error)]
 pub enum UserError {
-    #[error("password hashing failed: {0}")]
+    #[error("Hashing the password failed: {0}")]
     Hash(String),
-    #[error("invalid credentials")]
+    #[error("Invalid credentials")]
     InvalidCredentials,
-    #[error("invalid user id")]
+    #[error("Invalid user id")]
     InvalidId,
-    #[error("invite has been used")]
+    #[error("Invite has already been used")]
     InviteUsed,
-    #[error("username has been taken")]
+    #[error("Username has been taken")]
     UsernameTaken,
-    #[error("passwords do not match")]
+    #[error("Passwords do not match")]
     PasswordMismatch,
 }
 
@@ -28,9 +28,9 @@ impl From<argon2::password_hash::Error> for UserError {
 
 #[derive(Debug, Error)]
 pub enum PageError {
-    #[error("slug has been taken")]
+    #[error("Slug has been taken")]
     SlugTaken,
-    #[error("no page with this slug exists")]
+    #[error("No page with this slug exists")]
     NotFound,
 }
 
@@ -42,25 +42,27 @@ pub enum AppError {
     Page(#[from] PageError),
     #[error(transparent)]
     Validation(#[from] ValidationError),
-    #[error("database error")]
+    #[error("Database error: {0}")]
     Database(#[from] sqlx::Error),
-    #[error("bad request: {0}")]
-    BadRequest(String),
 }
 
-#[allow(clippy::use_self)]
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
-        let status = match &self {
-            AppError::BadRequest(_) | AppError::Validation(_) | AppError::Page(_) => {
-                StatusCode::BAD_REQUEST
+        #[allow(clippy::enum_glob_use)]
+        use AppError::*;
+        match &self {
+            Auth(UserError::InvalidCredentials) => (
+                StatusCode::UNAUTHORIZED,
+                format!("{}", UserError::InvalidCredentials),
+            )
+                .into_response(),
+            Auth(err) => (StatusCode::INTERNAL_SERVER_ERROR, format!("{err}")).into_response(),
+            Page(PageError::NotFound) => {
+                (StatusCode::NOT_FOUND, format!("{}", PageError::NotFound)).into_response()
             },
-            AppError::Auth(UserError::InvalidCredentials) => StatusCode::UNAUTHORIZED,
-            AppError::Auth(_) | AppError::Database(_) => StatusCode::INTERNAL_SERVER_ERROR,
-        };
-        if status == StatusCode::INTERNAL_SERVER_ERROR {
-            eprintln!("internal error: {self:?}");
+            Page(err) => (StatusCode::BAD_REQUEST, format!("{err}")).into_response(),
+            Validation(err) => (StatusCode::BAD_REQUEST, format!("{err}")).into_response(),
+            Database(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Database error").into_response(),
         }
-        (status, status.canonical_reason().unwrap_or("error")).into_response()
     }
 }

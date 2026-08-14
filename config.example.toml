@@ -19,7 +19,7 @@ html_max_bytes = 262144
 css_max_bytes = 131072
 
 [registration]
-require_invite = true
+require_invite = false
 
 [session]
 cookie_name = "session"

@@ -31,20 +31,6 @@ pub fn datetime_now() -> chrono::DateTime<Utc> {
 }
 
 #[macro_export]
-macro_rules! newtype_str {
-    ($name:ident) => {
-        #[derive(Debug, Clone, Serialize, Deserialize)]
-        pub struct $name(String);
-
-        impl $name {
-            pub fn as_str(&self) -> &str {
-                &self.0
-            }
-        }
-    };
-}
-
-#[macro_export]
 macro_rules! serde_default {
     ($($name:ident: $ty:ty = $val:expr;)*) => {
         paste::paste! {

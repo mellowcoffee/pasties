@@ -7,7 +7,7 @@ use crate::State;
 
 pub async fn get_page_by_slug(slug: &Slug, state: &State) -> Result<Option<Page>, sqlx::Error> {
     let page: Option<Page> = sqlx::query(
-        "SELECT (id, slug, owner_id, html, css, views, created_at, updated_at)
+        "SELECT id, slug, owner_id, html, css, views, created_at, updated_at
         FROM pages
         WHERE slug = $1",
     )
@@ -31,6 +31,7 @@ pub async fn insert_page(
         "
         INSERT INTO pages (id, slug, owner_id, html, css)
         VALUES ($1, $2, $3, $4, $5)
+        RETURNING id, slug, owner_id, html, css, views, created_at, updated_at
     ",
     )
     .bind(id)
@@ -55,7 +56,7 @@ pub async fn update_page_by_slug(
         UPDATE pages
         SET slug = $1, html = $2, css = $3, updated_at = $4
         WHERE slug = $5
-        RETURNING (id, slug, owner_id, html, css, views, created_at, updated_at)
+        RETURNING id, slug, owner_id, html, css, views, created_at, updated_at
     ",
     )
     .bind(new_slug)
