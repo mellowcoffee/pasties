@@ -9,3 +9,5 @@ check: fmt license
 
 watch:
     cargo watch -c -x clippy
+dev config="config.example.toml":
+    cargo watch -c -x "run -- {{config}}"

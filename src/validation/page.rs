@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::sync::LazyLock;
 
 use regex::Regex;
@@ -20,6 +21,14 @@ newtype!(Html(String), |raw, limits| {
     (raw.len() <= max)
         .then_some(raw)
         .ok_or(ValidationError::HtmlLength { max })
+        .map(|s| {
+            ammonia::Builder::default()
+                .add_tags(&["img"])
+                .add_tag_attributes("img", &["src", "alt", "width", "height", "title"])
+                .url_schemes(HashSet::from(["https"]))
+                .clean(&s)
+                .to_string()
+        })
 });
 
 newtype!(Css(String), |raw, limits| {

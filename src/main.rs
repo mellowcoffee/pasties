@@ -57,7 +57,7 @@ async fn main() -> anyhow::Result<()> {
 
     let app = Router::new()
         .route("/", get(|| async { "Hello, world!" }))
-        .merge(routes::pages::router(state));
+        .merge(routes::router(state));
     // .route("/register", get(register_get).post(register))
     // .route("/login", get(login_get).post(login))
     // .route("/logout", post(logout))
